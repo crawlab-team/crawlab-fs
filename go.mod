@@ -1,6 +1,6 @@
 module github.com/crawlab-team/crawlab-fs
 
-go 1.13
+go 1.15
 
 replace (
 	github.com/linxGnu/goseaweedfs => /Users/marvzhang/projects/tikazyq/goseaweedfs
