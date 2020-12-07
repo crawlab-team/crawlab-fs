@@ -1,0 +1,5 @@
+fs:
+  seaweedfs:
+    filer:
+      url: "http://localhost:8888"
+      timeoutMinutes: 5
