@@ -12,6 +12,6 @@ type Manager interface {
 	DownloadDir(remotePath, localPath string, args ...interface{}) (err error)
 	DeleteFile(remotePath string, args ...interface{}) (err error)
 	DeleteDir(remotePath string, args ...interface{}) (err error)
-	SyncDirToRemote(localPath, remotePath string, args ...interface{}) (err error)
-	SyncDirToLocal(remotePath, localPath string, args ...interface{}) (err error)
+	SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error)
+	SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error)
 }

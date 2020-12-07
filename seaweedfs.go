@@ -174,10 +174,32 @@ func (s SeaweedFSManager) DeleteDir(remotePath string, args ...interface{}) (err
 	return nil
 }
 
-func (s SeaweedFSManager) SyncDirToRemote(localPath, remotePath string, args ...interface{}) (err error) {
-	panic("implement me")
+func (s SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error) {
+	// cache local files info
+	localFilesMap := map[string]goseaweedfs.FileInfo{}
+	localFiles, err := goseaweedfs.ListLocalFilesRecursive(localPath)
+	if err != nil {
+		return err
+	}
+	for _, file := range localFiles {
+		localFilesMap[file.Path] = file
+	}
+
+	// cache remote files info
+	remoteFilesMap := map[string]goseaweedfs.FilerFileInfo{}
+	remoteFiles, err := s.f.ListDir(remotePath)
+	if err != nil {
+		return err
+	}
+	for _, file := range remoteFiles {
+		remoteFilesMap[file.FullPath] = file
+	}
+
+	// TODO: compare both local and remote files
+
+	return nil
 }
 
-func (s SeaweedFSManager) SyncDirToLocal(remotePath, localPath string, args ...interface{}) (err error) {
+func (s SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error) {
 	panic("implement me")
 }
