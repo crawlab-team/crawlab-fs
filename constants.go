@@ -1,5 +1,6 @@
 package fs
 
 const (
-	FilerNotFoundErrorMessage = "response status code: 404"
+	FilerResponseNotFoundErrorMessage = "response status code: 404"
+	FilerStatusNotFoundErrorMessage   = "Status:404 Not Found"
 )

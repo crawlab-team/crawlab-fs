@@ -290,7 +290,28 @@ func TestSeaweedFSManager_UpdateFile(t *testing.T) {
 	require.Nil(t, err)
 
 	data, err := manager.GetFile("/test/data/test_data.txt")
+	require.Nil(t, err)
 	require.Equal(t, "this is changed data", string(data))
+
+	cleanup(manager)
+}
+
+func TestSeaweedFSManager_Exists(t *testing.T) {
+	manager, err := NewSeaweedFSManager()
+	require.Nil(t, err)
+
+	setup(manager)
+
+	err = manager.UploadDir("./test/data", "/test/data")
+	require.Nil(t, err)
+
+	ok, err := manager.Exists("/test/data/test_data.txt")
+	require.Nil(t, err)
+	require.True(t, ok)
+
+	ok, err = manager.Exists("/test/data/test_data_404.txt")
+	require.Nil(t, err)
+	require.False(t, ok)
 
 	cleanup(manager)
 }

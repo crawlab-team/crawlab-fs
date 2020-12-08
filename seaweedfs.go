@@ -79,7 +79,7 @@ func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (l
 	// cache remote files info
 	remoteFiles, err = f.ListDir(remotePath)
 	if err != nil {
-		if err.Error() != FilerNotFoundErrorMessage {
+		if err.Error() != FilerResponseNotFoundErrorMessage {
 			return localFiles, remoteFiles, localFilesMap, remoteFilesMap, err
 		}
 		err = nil
@@ -91,18 +91,18 @@ func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (l
 	return
 }
 
-func (s SeaweedFSManager) Init() (err error) {
+func (s *SeaweedFSManager) Init() (err error) {
 	return nil
 }
 
-func (s SeaweedFSManager) Close() (err error) {
+func (s *SeaweedFSManager) Close() (err error) {
 	if err := s.f.Close(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s SeaweedFSManager) ListDir(remotePath string, args ...interface{}) (files []goseaweedfs.FilerFileInfo, err error) {
+func (s *SeaweedFSManager) ListDir(remotePath string, args ...interface{}) (files []goseaweedfs.FilerFileInfo, err error) {
 	files, err = s.f.ListDirRecursive(remotePath)
 	if err != nil {
 		return files, err
@@ -110,7 +110,7 @@ func (s SeaweedFSManager) ListDir(remotePath string, args ...interface{}) (files
 	return files, nil
 }
 
-func (s SeaweedFSManager) UploadFile(localPath, remotePath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) UploadFile(localPath, remotePath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (s SeaweedFSManager) UploadFile(localPath, remotePath string, args ...inter
 	return nil
 }
 
-func (s SeaweedFSManager) UploadDir(localPath, remotePath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) UploadDir(localPath, remotePath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -144,7 +144,7 @@ func (s SeaweedFSManager) UploadDir(localPath, remotePath string, args ...interf
 	return nil
 }
 
-func (s SeaweedFSManager) DownloadFile(remotePath, localPath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) DownloadFile(remotePath, localPath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -174,7 +174,7 @@ func (s SeaweedFSManager) DownloadFile(remotePath, localPath string, args ...int
 	return nil
 }
 
-func (s SeaweedFSManager) DownloadDir(remotePath, localPath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) DownloadDir(remotePath, localPath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -194,21 +194,21 @@ func (s SeaweedFSManager) DownloadDir(remotePath, localPath string, args ...inte
 	return nil
 }
 
-func (s SeaweedFSManager) DeleteFile(remotePath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) DeleteFile(remotePath string, args ...interface{}) (err error) {
 	if err := s.f.DeleteFile(remotePath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s SeaweedFSManager) DeleteDir(remotePath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) DeleteDir(remotePath string, args ...interface{}) (err error) {
 	if err := s.f.DeleteDir(remotePath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -269,7 +269,7 @@ func (s SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args .
 	return nil
 }
 
-func (s SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error) {
 	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
@@ -336,7 +336,7 @@ func (s SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args .
 	return nil
 }
 
-func (s SeaweedFSManager) GetFile(remotePath string, args ...interface{}) (data []byte, err error) {
+func (s *SeaweedFSManager) GetFile(remotePath string, args ...interface{}) (data []byte, err error) {
 	urlValues := getUrlValuesFromArgs(args...)
 	var buf bytes.Buffer
 	err = s.f.Download(remotePath, urlValues, func(reader io.Reader) error {
@@ -350,7 +350,7 @@ func (s SeaweedFSManager) GetFile(remotePath string, args ...interface{}) (data 
 	return
 }
 
-func (s SeaweedFSManager) UpdateFile(remotePath string, data []byte, args ...interface{}) (err error) {
+func (s *SeaweedFSManager) UpdateFile(remotePath string, data []byte, args ...interface{}) (err error) {
 	tmpDirPath := "./tmp"
 	if _, err := os.Stat(tmpDirPath); err != nil {
 		if err := os.MkdirAll(tmpDirPath, os.ModePerm); err != nil {
@@ -373,4 +373,17 @@ func (s SeaweedFSManager) UpdateFile(remotePath string, data []byte, args ...int
 		return err
 	}
 	return
+}
+
+func (s *SeaweedFSManager) Exists(remotePath string, args ...interface{}) (ok bool, err error) {
+	_, err = s.GetFile(remotePath, args...)
+	if err == nil {
+		// exists
+		return true, nil
+	}
+	if strings.Contains(err.Error(), FilerStatusNotFoundErrorMessage) {
+		// not exists
+		return false, nil
+	}
+	return ok, err
 }

@@ -16,4 +16,5 @@ type Manager interface {
 	SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error)
 	GetFile(remotePath string, args ...interface{}) (data []byte, err error)
 	UpdateFile(remotePath string, data []byte, args ...interface{}) (err error)
+	Exists(remotePath string, args ...interface{}) (ok bool, err error)
 }
