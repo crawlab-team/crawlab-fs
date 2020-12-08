@@ -1,7 +1,10 @@
 package fs
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/linxGnu/goseaweedfs"
 	"github.com/spf13/viper"
 	"io"
@@ -11,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -55,6 +59,36 @@ func getUrlValuesFromArgs(args ...interface{}) (values url.Values) {
 		values = args[0].(url.Values)
 	}
 	return values
+}
+
+func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (localFiles []goseaweedfs.FileInfo, remoteFiles []goseaweedfs.FilerFileInfo, localFilesMap map[string]goseaweedfs.FileInfo, remoteFilesMap map[string]goseaweedfs.FilerFileInfo, err error) {
+	// declare maps
+	localFilesMap = map[string]goseaweedfs.FileInfo{}
+	remoteFilesMap = map[string]goseaweedfs.FilerFileInfo{}
+
+	// cache local files info
+	localFiles, err = goseaweedfs.ListLocalFilesRecursive(localPath)
+	if err != nil {
+		return localFiles, remoteFiles, localFilesMap, remoteFilesMap, err
+	}
+	for _, file := range localFiles {
+		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(file.Path, localPath, "", -1))
+		localFilesMap[fileRemotePath] = file
+	}
+
+	// cache remote files info
+	remoteFiles, err = f.ListDir(remotePath)
+	if err != nil {
+		if err.Error() != FilerNotFoundErrorMessage {
+			return localFiles, remoteFiles, localFilesMap, remoteFilesMap, err
+		}
+		err = nil
+	}
+	for _, file := range remoteFiles {
+		remoteFilesMap[file.FullPath] = file
+	}
+
+	return
 }
 
 func (s SeaweedFSManager) Init() (err error) {
@@ -175,31 +209,168 @@ func (s SeaweedFSManager) DeleteDir(remotePath string, args ...interface{}) (err
 }
 
 func (s SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error) {
-	// cache local files info
-	localFilesMap := map[string]goseaweedfs.FileInfo{}
-	localFiles, err := goseaweedfs.ListLocalFilesRecursive(localPath)
+	localPath, err = filepath.Abs(localPath)
 	if err != nil {
 		return err
 	}
-	for _, file := range localFiles {
-		localFilesMap[file.Path] = file
+
+	// raise error if local path does not exist
+	if _, err := os.Stat(localPath); err != nil {
+		return err
 	}
 
-	// cache remote files info
-	remoteFilesMap := map[string]goseaweedfs.FilerFileInfo{}
-	remoteFiles, err := s.f.ListDir(remotePath)
+	// get files and maps
+	localFiles, remoteFiles, localFilesMap, remoteFilesMap, err := getFilesAndFilesMaps(s.f, localPath, remotePath)
 	if err != nil {
 		return err
 	}
-	for _, file := range remoteFiles {
-		remoteFilesMap[file.FullPath] = file
+
+	// compare remote files with local files and delete files absent in local files
+	for _, remoteFile := range remoteFiles {
+		// skip directories
+		if remoteFile.IsDir {
+			continue
+		}
+
+		// attempt to get corresponding local file
+		_, ok := localFilesMap[remoteFile.FullPath]
+
+		if !ok {
+			// file does not exist on local, delete
+			if err := s.DeleteFile(remoteFile.FullPath); err != nil {
+				return err
+			}
+		}
 	}
 
-	// TODO: compare both local and remote files
+	// compare local files with remote files and upload files with difference
+	for _, localFile := range localFiles {
+		// corresponding remote file path
+		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(localFile.Path, localPath, "", -1))
+
+		// attempt to get corresponding remote file
+		remoteFile, ok := remoteFilesMap[fileRemotePath]
+
+		if !ok {
+			// file does not exist on remote, upload
+			if err := s.UploadFile(localFile.Path, fileRemotePath, args...); err != nil {
+				return err
+			}
+		} else {
+			// file exists on remote, upload if md5sum values are different
+			if remoteFile.Md5 != localFile.Md5 {
+				if err := s.UploadFile(localFile.Path, fileRemotePath, args...); err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	return nil
 }
 
 func (s SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error) {
-	panic("implement me")
+	localPath, err = filepath.Abs(localPath)
+	if err != nil {
+		return err
+	}
+
+	// create directory if local path does not exist
+	if _, err := os.Stat(localPath); err != nil {
+		if err := os.MkdirAll(localPath, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	// get files and maps
+	localFiles, remoteFiles, localFilesMap, remoteFilesMap, err := getFilesAndFilesMaps(s.f, localPath, remotePath)
+	if err != nil {
+		return err
+	}
+
+	// compare local files with remote files and delete files absent on remote
+	for _, localFile := range localFiles {
+		// corresponding remote file path
+		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(localFile.Path, localPath, "", -1))
+
+		// attempt to get corresponding remote file
+		_, ok := remoteFilesMap[fileRemotePath]
+
+		if !ok {
+			// file does not exist on remote, upload
+			if err := os.Remove(localFile.Path); err != nil {
+				return err
+			}
+		}
+	}
+
+	// compare remote files with local files and download if files with difference
+	for _, remoteFile := range remoteFiles {
+		// skip directories
+		if remoteFile.IsDir {
+			continue
+		}
+
+		// local file path
+		localFileRelativePath := strings.Replace(remoteFile.FullPath, remotePath, "", -1)
+		localFilePath := fmt.Sprintf("%s%s", localPath, localFileRelativePath)
+
+		// attempt to get corresponding local file
+		localFile, ok := localFilesMap[remoteFile.FullPath]
+
+		if !ok {
+			// file does not exist on local, download
+			if err := s.DownloadFile(remoteFile.FullPath, localFilePath); err != nil {
+				return err
+			}
+		} else {
+			// file exists on remote, download if md5sum values are different
+			if remoteFile.Md5 != localFile.Md5 {
+				if err := s.DownloadFile(remoteFile.FullPath, localFilePath, args...); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s SeaweedFSManager) GetFile(remotePath string, args ...interface{}) (data []byte, err error) {
+	urlValues := getUrlValuesFromArgs(args...)
+	var buf bytes.Buffer
+	err = s.f.Download(remotePath, urlValues, func(reader io.Reader) error {
+		_, err := io.Copy(&buf, reader)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	data = buf.Bytes()
+	return
+}
+
+func (s SeaweedFSManager) UpdateFile(remotePath string, data []byte, args ...interface{}) (err error) {
+	tmpDirPath := "./tmp"
+	if _, err := os.Stat(tmpDirPath); err != nil {
+		if err := os.MkdirAll(tmpDirPath, os.ModePerm); err != nil {
+			return err
+		}
+	}
+	tmpFilePath := path.Join(tmpDirPath, fmt.Sprintf(".%s", uuid.New().String()))
+	if _, err := os.Stat(tmpFilePath); err == nil {
+		if err := os.Remove(tmpFilePath); err != nil {
+			return err
+		}
+	}
+	if err := ioutil.WriteFile(tmpFilePath, data, os.ModePerm); err != nil {
+		return err
+	}
+	if err = s.UploadFile(tmpFilePath, remotePath, args...); err != nil {
+		return err
+	}
+	if err := os.Remove(tmpFilePath); err != nil {
+		return err
+	}
+	return
 }
