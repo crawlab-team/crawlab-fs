@@ -351,7 +351,8 @@ func (s *SeaweedFSManager) GetFile(remotePath string, args ...interface{}) (data
 }
 
 func (s *SeaweedFSManager) UpdateFile(remotePath string, data []byte, args ...interface{}) (err error) {
-	tmpDirPath := "./tmp"
+	tmpRootDir := os.TempDir()
+	tmpDirPath := path.Join(tmpRootDir, ".seaweedfs")
 	if _, err := os.Stat(tmpDirPath); err != nil {
 		if err := os.MkdirAll(tmpDirPath, os.ModePerm); err != nil {
 			return err
