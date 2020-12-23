@@ -102,8 +102,12 @@ func (s *SeaweedFSManager) Close() (err error) {
 	return nil
 }
 
-func (s *SeaweedFSManager) ListDir(remotePath string, args ...interface{}) (files []goseaweedfs.FilerFileInfo, err error) {
-	files, err = s.f.ListDirRecursive(remotePath)
+func (s *SeaweedFSManager) ListDir(remotePath string, isRecursive bool, args ...interface{}) (files []goseaweedfs.FilerFileInfo, err error) {
+	if isRecursive {
+		files, err = s.f.ListDirRecursive(remotePath)
+	} else {
+		files, err = s.f.ListDir(remotePath)
+	}
 	if err != nil {
 		return files, err
 	}
@@ -179,7 +183,7 @@ func (s *SeaweedFSManager) DownloadDir(remotePath, localPath string, args ...int
 	if err != nil {
 		return err
 	}
-	files, err := s.ListDir(remotePath)
+	files, err := s.ListDir(remotePath, true)
 	for _, file := range files {
 		if file.IsDir {
 			if err := s.DownloadDir(file.FullPath, path.Join(localPath, file.Name), args...); err != nil {

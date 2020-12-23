@@ -32,7 +32,7 @@ func TestSeaweedFSManager_ListDir(t *testing.T) {
 	require.Nil(t, err)
 
 	valid := false
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	require.Nil(t, err)
 	for _, f1 := range files {
 		if f1.Name == "nested" && f1.Children != nil {
@@ -57,7 +57,7 @@ func TestSeaweedFSManager_UploadFile(t *testing.T) {
 	err = manager.UploadFile("./test/data/test_data.txt", "/test/data/test_data.txt")
 	require.Nil(t, err)
 
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	require.Nil(t, err)
 	valid := false
 	for _, file := range files {
@@ -80,7 +80,7 @@ func TestSeaweedFSManager_UploadDir(t *testing.T) {
 	require.Nil(t, err)
 
 	valid := false
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	require.Nil(t, err)
 	for _, f1 := range files {
 		if f1.Name == "nested" && f1.Children != nil {
@@ -161,7 +161,7 @@ func TestSeaweedFSManager_DeleteFile(t *testing.T) {
 	err = manager.DeleteFile("/test/data/test_data.txt")
 	require.Nil(t, err)
 
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	require.Nil(t, err)
 	require.Equal(t, 0, len(files))
 
@@ -180,7 +180,7 @@ func TestSeaweedFSManager_DeleteDir(t *testing.T) {
 	err = manager.DeleteDir("/test/data/nested")
 	require.Nil(t, err)
 
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	require.Nil(t, err)
 	valid := true
 	for _, file := range files {
@@ -224,7 +224,7 @@ func TestSeaweedFSManager_SyncLocalToRemote(t *testing.T) {
 	require.Nil(t, err)
 
 	valid := true
-	files, err := manager.ListDir("/test/data")
+	files, err := manager.ListDir("/test/data", true)
 	for _, file := range files {
 		if file.Name == "test_data.txt" {
 			valid = false
