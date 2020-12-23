@@ -245,6 +245,11 @@ func (s *SeaweedFSManager) SyncLocalToRemote(localPath, remotePath string, args 
 
 	// compare local files with remote files and upload files with difference
 	for _, localFile := range localFiles {
+		// skip .git
+		if IsGitFile(localFile) {
+			continue
+		}
+
 		// corresponding remote file path
 		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(localFile.Path, localPath, "", -1))
 
@@ -290,6 +295,11 @@ func (s *SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args 
 
 	// compare local files with remote files and delete files absent on remote
 	for _, localFile := range localFiles {
+		// skip .git
+		if IsGitFile(localFile) {
+			continue
+		}
+
 		// corresponding remote file path
 		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(localFile.Path, localPath, "", -1))
 
@@ -312,7 +322,7 @@ func (s *SeaweedFSManager) SyncRemoteToLocal(remotePath, localPath string, args 
 		}
 
 		// local file path
-		localFileRelativePath := strings.Replace(remoteFile.FullPath, remotePath, "", -1)
+		localFileRelativePath := strings.Replace(remoteFile.FullPath, remotePath, "", 1)
 		localFilePath := fmt.Sprintf("%s%s", localPath, localFileRelativePath)
 
 		// attempt to get corresponding local file
