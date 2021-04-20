@@ -3,6 +3,8 @@ version: '2'
 services:
   master:
     image: chrislusf/seaweedfs # use a remote image
+    container_name: seaweedfs-master
+    restart: always
     ports:
       - 9333:9333
       - 19333:19333
@@ -11,6 +13,8 @@ services:
       - "/Users/marvzhang/projects/crawlab-team/crawlab-fs/tmp/master:/root/master"
   volume:
     image: chrislusf/seaweedfs # use a remote image
+    container_name: seaweedfs-volume
+    restart: always
     ports:
       - 8080:8080
       - 18080:18080
@@ -19,6 +23,8 @@ services:
       - master
   filer:
     image: chrislusf/seaweedfs # use a remote image
+    container_name: seaweedfs-filer
+    restart: always
     ports:
       - 8888:8888
 #      - 18888:18888
