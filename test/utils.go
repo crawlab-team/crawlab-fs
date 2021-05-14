@@ -13,6 +13,9 @@ import (
 )
 
 func StartTestContainers() (filePath string, err error) {
+	// force remove containers
+	removeTestContainers()
+
 	// directories
 	tmpDir := os.TempDir()
 	id, _ := uuid.NewUUID()
@@ -52,7 +55,7 @@ func StartTestContainers() (filePath string, err error) {
 		}
 		return nil
 	}, backoff.NewConstantBackOff(5*time.Second), func(err error, duration time.Duration) {
-		log.Infof("seaweedfs containers not ready, re-attempt in %d seconds", duration.Seconds())
+		log.Infof("seaweedfs containers not ready, re-attempt in %.1f seconds", duration.Seconds())
 	})
 	if err != nil {
 		return filePath, trace.TraceError(err)
@@ -75,4 +78,10 @@ func StopTestContainers(filePath string) (err error) {
 	}
 
 	return nil
+}
+
+func removeTestContainers() {
+	_ = exec.Command("docker", "rm", "-f", "seaweedfs-master").Run()
+	_ = exec.Command("docker", "rm", "-f", "seaweedfs-volume").Run()
+	_ = exec.Command("docker", "rm", "-f", "seaweedfs-filer").Run()
 }
