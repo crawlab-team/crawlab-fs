@@ -2,7 +2,7 @@ package fs
 
 import (
 	"fmt"
-	"github.com/linxGnu/goseaweedfs"
+	"github.com/crawlab-team/goseaweedfs"
 	"net/url"
 	"regexp"
 	"strings"

@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"github.com/linxGnu/goseaweedfs"
+	"github.com/crawlab-team/goseaweedfs"
 	"time"
 )
 
