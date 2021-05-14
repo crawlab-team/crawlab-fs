@@ -77,6 +77,9 @@ func StopTestContainers(filePath string) (err error) {
 		return trace.TraceError(err)
 	}
 
+	// remove networks
+	_ = exec.Command("docker", "network", "prune")
+
 	return nil
 }
 
