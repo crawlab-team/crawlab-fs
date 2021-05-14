@@ -16,8 +16,8 @@ func TestMain(m *testing.M) {
 	m.Run()
 
 	// after test
-	//cmd = exec.Command("docker-compose", "down")
-	//runCmd(cmd)
+	cmd = exec.Command("docker-compose", "down")
+	runCmd(cmd)
 }
 
 func runCmd(cmd *exec.Cmd) {

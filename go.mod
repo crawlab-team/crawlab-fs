@@ -10,6 +10,7 @@ replace (
 require (
 	github.com/crawlab-team/go-trace v0.0.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/google/uuid v1.1.1
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/linxGnu/goseaweedfs v0.1.5
