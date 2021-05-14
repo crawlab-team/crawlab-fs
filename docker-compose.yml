@@ -38,3 +38,5 @@ services:
             context: .
         depends_on:
             - filer
+        volumes:
+            - /root/.codecov_token:/app/.codecov_token
