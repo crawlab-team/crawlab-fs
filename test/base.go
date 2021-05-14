@@ -2,6 +2,7 @@ package test
 
 import (
 	fs "github.com/crawlab-team/crawlab-fs"
+	"os"
 	"testing"
 	"time"
 )
@@ -36,9 +37,15 @@ func NewTest() (res *Test, err error) {
 	// test
 	t := &Test{}
 
+	// filer url
+	filerUrl := os.Getenv("CRAWLAB_FILER_URL")
+	if filerUrl == "" {
+		filerUrl = "http://localhost:8888"
+	}
+
 	// manager
 	t.m, err = fs.NewSeaweedFsManager(
-		fs.WithFilerUrl("http://localhost:8888"),
+		fs.WithFilerUrl(filerUrl),
 		fs.WithTimeout(10*time.Second),
 	)
 	if err != nil {

@@ -1,10 +1,7 @@
-FROM ubuntu:latest
+FROM golang:1.15
 
-RUN chmod 777 /tmp \
-    && apt-get update \
-    && apt-get install -y curl wget
+ADD ./go.mod .
+ADD ./go.sum .
+RUN go mod download
 
-RUN wget https://github.com/chrislusf/seaweedfs/releases/download/2.13/linux_amd64.tar.gz \
-    && tar -zxf linux_amd64.tar.gz \
-    && mv weed /usr/local/bin
-
+CMD ["sh", "./bin/test.sh"]
