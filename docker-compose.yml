@@ -9,8 +9,6 @@ services:
       - 9333:9333
       - 19333:19333
     command: "master -ip=master"
-    volumes:
-      - "/Users/marvzhang/projects/crawlab-team/crawlab-fs/tmp/master:/root/master"
   volume:
     image: chrislusf/seaweedfs # use a remote image
     container_name: seaweedfs-volume
