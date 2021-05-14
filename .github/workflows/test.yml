@@ -10,7 +10,7 @@ jobs:
               with:
                   fetch-depth: 2
             - name: create token
-              run: echo "{{ secrets.CODECOV_TOKEN }}" >> /root/.codecov_token
+              run: echo "${{ secrets.CODECOV_TOKEN }}" >> ${{ env.GITHUB_WORKSPACE }}/.codecov_token
             - name: docker-compose
               uses: isbang/compose-action@v1.0.0
               with:
