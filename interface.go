@@ -1,6 +1,9 @@
 package fs
 
-import "github.com/linxGnu/goseaweedfs"
+import (
+	"github.com/linxGnu/goseaweedfs"
+	"time"
+)
 
 type Manager interface {
 	Init() (err error)
@@ -17,4 +20,6 @@ type Manager interface {
 	GetFile(remotePath string, args ...interface{}) (data []byte, err error)
 	UpdateFile(remotePath string, data []byte, args ...interface{}) (err error)
 	Exists(remotePath string, args ...interface{}) (ok bool, err error)
+	SetFilerUrl(url string)
+	SetTimeout(timeout time.Duration)
 }
