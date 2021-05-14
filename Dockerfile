@@ -1,7 +1,8 @@
 FROM golang:1.15
 
-ADD ./go.mod .
-ADD ./go.sum .
+WORKDIR /app
+ADD ./go.mod /app
+ADD ./go.sum /app
 RUN go mod download
 
 CMD ["sh", "./bin/test.sh"]
