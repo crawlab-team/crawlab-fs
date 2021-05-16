@@ -1,28 +1,22 @@
 package test
 
 import (
+	"fmt"
 	"github.com/apex/log"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/crawlab-team/go-trace"
+	"github.com/google/uuid"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"time"
 )
 
 func init() {
-	var err error
-	TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
-	if err != nil {
-		panic(err)
-	}
-	if _, err := os.Stat(TmpDir); err != nil {
-		if err := os.MkdirAll(TmpDir, os.FileMode(0766)); err != nil {
-			panic(err)
-		}
-	}
+	//var err error
+	//TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
+	TmpDir = getTmpDir()
 }
 
 var TmpDir string
@@ -55,14 +49,17 @@ func StartTestSeaweedFs() (err error) {
 }
 
 func StopTestSeaweedFs() (err error) {
+	// stop seaweedfs
+	if err := runCmd(exec.Command("sh", "./stop.sh"), TmpDir); err != nil {
+		return trace.TraceError(err)
+	}
+	time.Sleep(5 * time.Second)
+
 	// remove tmp folder
 	if err := os.RemoveAll(TmpDir); err != nil {
 		return trace.TraceError(err)
 	}
 
-	// stop seaweedfs
-	_ = runCmd(exec.Command("sh", "./stop.sh"), TmpDir)
-	time.Sleep(5 * time.Second)
 	return nil
 }
 
@@ -90,4 +87,15 @@ func runCmd(cmd *exec.Cmd, dirPath string) (err error) {
 	log.Infof("running cmd: %v", cmd)
 	cmd.Dir = dirPath
 	return cmd.Run()
+}
+
+func getTmpDir() string {
+	id, _ := uuid.NewUUID()
+	tmpDir := fmt.Sprintf("%s%s", os.TempDir(), id.String())
+	if _, err := os.Stat(tmpDir); err != nil {
+		if err := os.MkdirAll(tmpDir, os.FileMode(0766)); err != nil {
+			panic(err)
+		}
+	}
+	return tmpDir
 }
