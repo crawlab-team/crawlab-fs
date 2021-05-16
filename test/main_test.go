@@ -6,8 +6,7 @@ import (
 
 func TestMain(m *testing.M) {
 	// before test
-	filePath, err := StartTestContainers()
-	if err != nil {
+	if err := StartTestSeaweedFs(); err != nil {
 		panic(err)
 	}
 
@@ -15,5 +14,5 @@ func TestMain(m *testing.M) {
 	m.Run()
 
 	// after test
-	_ = StopTestContainers(filePath)
+	_ = StopTestSeaweedFs()
 }

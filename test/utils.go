@@ -4,47 +4,37 @@ import (
 	"github.com/apex/log"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/crawlab-team/go-trace"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"time"
 )
 
-func StartTestContainers() (filePath string, err error) {
-	// force remove containers
-	removeTestContainers()
-
-	// directories
-	tmpDir := os.TempDir()
-	id, _ := uuid.NewUUID()
-	dirName := id.String()
-	dirPath := path.Join(tmpDir, dirName)
-	if _, err := os.Stat(dirPath); err != nil {
-		if err := os.MkdirAll(dirPath, os.FileMode(0766)); err != nil {
-			return filePath, trace.TraceError(err)
-		}
-	}
-
-	// write to docker-compose.yml
-	data, err := Asset("docker-compose.yml")
+func init() {
+	var err error
+	TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
 	if err != nil {
-		return filePath, trace.TraceError(err)
-	}
-	filePath = path.Join(dirPath, "docker-compose.yml")
-	if err := ioutil.WriteFile(filePath, data, os.FileMode(0766)); err != nil {
-		return filePath, trace.TraceError(err)
-	}
-
-	// docker-compose up
-	cmd := exec.Command("docker-compose", "up", "-d")
-	cmd.Dir = dirPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stdout
-	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
+	if _, err := os.Stat(TmpDir); err != nil {
+		if err := os.MkdirAll(TmpDir, os.FileMode(0766)); err != nil {
+			panic(err)
+		}
+	}
+}
+
+var TmpDir string
+
+func StartTestSeaweedFs() (err error) {
+	// write to start.sh and stop.sh
+	if err := writeShFiles(TmpDir); err != nil {
+		return trace.TraceError(err)
+	}
+
+	// run weed
+	go runCmd(exec.Command("sh", "./start.sh"), TmpDir)
 
 	// wait for containers to be ready
 	time.Sleep(5 * time.Second)
@@ -55,36 +45,49 @@ func StartTestContainers() (filePath string, err error) {
 		}
 		return nil
 	}, backoff.NewConstantBackOff(5*time.Second), func(err error, duration time.Duration) {
-		log.Infof("seaweedfs containers not ready, re-attempt in %.1f seconds", duration.Seconds())
+		log.Infof("seaweedfs services not ready, re-attempt in %.1f seconds", duration.Seconds())
 	})
 	if err != nil {
-		return filePath, trace.TraceError(err)
-	}
-
-	return filePath, nil
-}
-
-func StopTestContainers(filePath string) (err error) {
-	// directories
-	dirPath := path.Dir(filePath)
-
-	// docker-compose down
-	cmd := exec.Command("docker-compose", "down", "-v")
-	cmd.Dir = dirPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stdout
-	if err := cmd.Run(); err != nil {
 		return trace.TraceError(err)
 	}
-
-	// remove networks
-	_ = exec.Command("docker", "network", "prune")
 
 	return nil
 }
 
-func removeTestContainers() {
-	_ = exec.Command("docker", "rm", "-f", "seaweedfs-master").Run()
-	_ = exec.Command("docker", "rm", "-f", "seaweedfs-volume").Run()
-	_ = exec.Command("docker", "rm", "-f", "seaweedfs-filer").Run()
+func StopTestSeaweedFs() (err error) {
+	// remove tmp folder
+	if err := os.RemoveAll(TmpDir); err != nil {
+		return trace.TraceError(err)
+	}
+
+	// stop seaweedfs
+	_ = runCmd(exec.Command("sh", "./stop.sh"), TmpDir)
+	time.Sleep(5 * time.Second)
+	return nil
+}
+
+func writeShFiles(dirPath string) (err error) {
+	fileNames := []string{
+		"start.sh",
+		"stop.sh",
+	}
+
+	for _, fileName := range fileNames {
+		data, err := Asset("bin/" + fileName)
+		if err != nil {
+			return trace.TraceError(err)
+		}
+		filePath := path.Join(dirPath, fileName)
+		if err := ioutil.WriteFile(filePath, data, os.FileMode(0766)); err != nil {
+			return trace.TraceError(err)
+		}
+	}
+
+	return nil
+}
+
+func runCmd(cmd *exec.Cmd, dirPath string) (err error) {
+	log.Infof("running cmd: %v", cmd)
+	cmd.Dir = dirPath
+	return cmd.Run()
 }
