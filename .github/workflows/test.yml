@@ -35,12 +35,12 @@ jobs:
 
       - name: Extract Binary Files
         run: |
-          cd seaweedfs
+          cd $GITHUB_WORKSPACE/seaweedfs
           tar -zxf linux_amd64.tar.gz
 
       - name: Validate Binary Files
         run: |
-          cd seaweedfs
+          cd $GITHUB_WORKSPACE/seaweedfs
           ls -l weed
 
       - name: Run Tests
