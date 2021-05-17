@@ -32,30 +32,17 @@ jobs:
           file: linux_amd64.tar.gz
           # Path to the directory where to download the asset
           out: seaweedfs # optional, default is .
-          # The GitHub access token
-#          token: # optional, default is
+
+      - name: Validte Binary Files
+        run: |
+          ls -l
+
+#      - name: Run Tests
+#        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
+#
+#      - name: Codecov
+#        uses: codecov/codecov-action@v1.5.0
 #        with:
-          # The source repository path. Expected format {owner}/{repo}
-#          repository: chrislusf/seaweedfs # default is
-          # A flag to choose between latest release and remaining releases
-          #latest: true # optional, default is false
-          # The github tag to download the release from
-#          tag: 2.48 # optional, default is
-#          # Name of the file to download
-#          fileName: linux_amd64.tar.gz # optional, default is
-#          # Download tarball from assets
-#          tarBall: true # optional, default is false
-#          # Download zipball from assets
-#          #zipBall: true # optional, default is false
-#          # Relative path under $GITHUB_WORKSPACE to place the downloaded files
-#          out-file-path: seaweedfs # default is .
-
-      - name: Run Tests
-        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
-
-      - name: Codecov
-        uses: codecov/codecov-action@v1.5.0
-        with:
-          # Repository upload token - get it from codecov.io. Required only for private repositories
-          token: ${{ secrets.CODECOV_TOKEN }}
-          # Comma-separated list of files to upload
+#          # Repository upload token - get it from codecov.io. Required only for private repositories
+#          token: ${{ secrets.CODECOV_TOKEN }}
+#          # Comma-separated list of files to upload
