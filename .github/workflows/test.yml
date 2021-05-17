@@ -37,7 +37,7 @@ jobs:
           # Download tarball from assets
           tarBall: true # optional, default is false
           # Download zipball from assets
-          zipBall: true # optional, default is false
+          #zipBall: true # optional, default is false
           # Relative path under $GITHUB_WORKSPACE to place the downloaded files
           out-file-path: seaweedfs # default is .
 
