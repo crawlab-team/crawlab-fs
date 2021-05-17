@@ -94,6 +94,8 @@ func writeShFiles(dirPath string) (err error) {
 func runCmd(cmd *exec.Cmd, dirPath string) (err error) {
 	log.Infof("running cmd: %v", cmd)
 	cmd.Dir = dirPath
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stdout
 	return cmd.Run()
 }
 
