@@ -29,7 +29,7 @@ jobs:
           # The source repository path. Expected format {owner}/{repo}
           repository: chrislusf/seaweedfs # default is
           # A flag to choose between latest release and remaining releases
-          latest: true # optional, default is false
+          #latest: true # optional, default is false
           # The github tag to download the release from
           tag: 2.48 # optional, default is
           # Name of the file to download
