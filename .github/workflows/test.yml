@@ -18,7 +18,7 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/seaweedfs
           curl https://github.com/chrislusf/seaweedfs/releases/download/2.48/linux_amd64.tar.gz -o $GITHUB_WORKSPACE/seaweedfs/linux_amd64.tar.gz
-          cd -p $GITHUB_WORKSPACE/seaweedfs
+          cd $GITHUB_WORKSPACE/seaweedfs
           tar -zxf linux_amd64.tar.gz
 #        uses: robinraju/release-downloader@v1
 #        with:
