@@ -15,13 +15,18 @@ jobs:
           go-version: 1.15
 
       - name: Download Binary Files
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: "chrislusf/seaweedfs"
-          tag: "2.48"
-          fileName: "linux_amd64.tar.gz"
-          tarBall: true
-          out-file-path: "seaweedfs"
+        run: |
+          mkdir -p ${{ GITHUB_WORKSPACE }}/seaweedfs
+          curl https://github.com/chrislusf/seaweedfs/releases/download/2.48/linux_amd64.tar.gz -o ${{ GITHUB_WORKSPACE }}/seaweedfs/linux_amd64.tar.gz
+          cd -p ${{ GITHUB_WORKSPACE }}/seaweedfs
+          tar -zxf linux_amd64.tar.gz
+#        uses: robinraju/release-downloader@v1
+#        with:
+#          repository: "chrislusf/seaweedfs"
+#          tag: "2.48"
+#          fileName: "linux_amd64.tar.gz"
+#          tarBall: true
+#          out-file-path: "seaweedfs"
 
       - name: Run Tests
         run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
