@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/apex/log"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/crawlab-team/go-trace"
@@ -91,7 +90,7 @@ func runCmd(cmd *exec.Cmd, dirPath string) (err error) {
 
 func getTmpDir() string {
 	id, _ := uuid.NewUUID()
-	tmpDir := fmt.Sprintf("%s%s", os.TempDir(), id.String())
+	tmpDir := path.Join(os.TempDir(), id.String())
 	if _, err := os.Stat(tmpDir); err != nil {
 		if err := os.MkdirAll(tmpDir, os.FileMode(0766)); err != nil {
 			panic(err)
