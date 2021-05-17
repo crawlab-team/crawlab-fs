@@ -33,18 +33,22 @@ jobs:
           # Path to the directory where to download the asset
           out: seaweedfs # optional, default is .
 
+      - name: Extract Binary Files
+        run: |
+          cd seaweedfs
+          tar -zxf linux_amd64.tar.gz
+
       - name: Validate Binary Files
         run: |
-          ls -l
           cd seaweedfs
-          ls -l
+          ls -l weed
 
-#      - name: Run Tests
-#        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
-#
-#      - name: Codecov
-#        uses: codecov/codecov-action@v1.5.0
-#        with:
-#          # Repository upload token - get it from codecov.io. Required only for private repositories
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          # Comma-separated list of files to upload
+      - name: Run Tests
+        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.5.0
+        with:
+          # Repository upload token - get it from codecov.io. Required only for private repositories
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # Comma-separated list of files to upload

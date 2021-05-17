@@ -40,15 +40,18 @@ func StartTestSeaweedFs() (err error) {
 
 	// wait for containers to be ready
 	time.Sleep(5 * time.Second)
-	err = backoff.RetryNotify(func() error {
+	f := func() error {
 		_, err := T.m.ListDir("/", true)
 		if err != nil {
 			return err
 		}
 		return nil
-	}, backoff.NewConstantBackOff(5*time.Second), func(err error, duration time.Duration) {
+	}
+	b := backoff.WithMaxRetries(backoff.NewConstantBackOff(5*time.Second), 5)
+	nt := func(err error, duration time.Duration) {
 		log.Infof("seaweedfs services not ready, re-attempt in %.1f seconds", duration.Seconds())
-	})
+	}
+	err = backoff.RetryNotify(f, b, nt)
 	if err != nil {
 		return trace.TraceError(err)
 	}
@@ -94,8 +97,8 @@ func writeShFiles(dirPath string) (err error) {
 func runCmd(cmd *exec.Cmd, dirPath string) (err error) {
 	log.Infof("running cmd: %v", cmd)
 	cmd.Dir = dirPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stdout
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stdout
 	return cmd.Run()
 }
 
