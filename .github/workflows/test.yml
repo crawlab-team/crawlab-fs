@@ -33,8 +33,10 @@ jobs:
           # Path to the directory where to download the asset
           out: seaweedfs # optional, default is .
 
-      - name: Validte Binary Files
+      - name: Validate Binary Files
         run: |
+          ls -l
+          cd seaweedfs
           ls -l
 
 #      - name: Run Tests
