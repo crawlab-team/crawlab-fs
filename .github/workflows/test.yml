@@ -14,20 +14,32 @@ jobs:
           # The Go version to download (if necessary) and use. Supports semver spec and ranges.
           go-version: 1.15
 
+#      - name: Download Binary Files
+#        run: |
+#          mkdir -p $GITHUB_WORKSPACE/seaweedfs
+#          curl https://github.com/chrislusf/seaweedfs/releases/download/2.48/linux_amd64.tar.gz -o $GITHUB_WORKSPACE/seaweedfs/linux_amd64.tar.gz
+#          cd $GITHUB_WORKSPACE/seaweedfs
+#          ls -l
+#          tar -zxf linux_amd64.tar.gz
       - name: Download Binary Files
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/seaweedfs
-          curl https://github.com/chrislusf/seaweedfs/releases/download/2.48/linux_amd64.tar.gz -o $GITHUB_WORKSPACE/seaweedfs/linux_amd64.tar.gz
-          cd $GITHUB_WORKSPACE/seaweedfs
-          ls -l
-          tar -zxf linux_amd64.tar.gz
-#        uses: robinraju/release-downloader@v1
-#        with:
-#          repository: "chrislusf/seaweedfs"
-#          tag: "2.48"
-#          fileName: "linux_amd64.tar.gz"
-#          tarBall: true
-#          out-file-path: "seaweedfs"
+        # You may pin to the exact commit or the version.
+        # uses: robinraju/release-downloader@f41ad93917b84eb8b8900599138dba28ed91ce80
+        uses: robinraju/release-downloader@v1
+        with:
+          # The source repository path. Expected format {owner}/{repo}
+          repository: chrislusf/seaweedfs # default is
+          # A flag to choose between latest release and remaining releases
+          latest: true # optional, default is false
+          # The github tag to download the release from
+          tag: 2.48 # optional, default is
+          # Name of the file to download
+          fileName: linux_amd64.tar.gz # optional, default is
+          # Download tarball from assets
+          tarBall: true # optional, default is false
+          # Download zipball from assets
+          zipBall: true # optional, default is false
+          # Relative path under $GITHUB_WORKSPACE to place the downloaded files
+          out-file-path: seaweedfs # default is .
 
       - name: Run Tests
         run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/crawlab-team/crawlab-fs
