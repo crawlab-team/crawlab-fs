@@ -18,7 +18,8 @@ jobs:
         uses: robinraju/release-downloader@v1
         with:
           repository: "chrislusf/seaweedfs"
-          fileName: "2.48"
+          tag: "2.48"
+          fileName: "linux_amd64.tar.gz"
           tarBall: true
           out-file-path: "seaweedfs"
 
