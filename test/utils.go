@@ -9,13 +9,22 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"time"
 )
 
 func init() {
-	//var err error
-	//TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
-	TmpDir = getTmpDir()
+	var err error
+	TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
+	if err != nil {
+		panic(err)
+	}
+	if _, err := os.Stat(TmpDir); err != nil {
+		if err := os.MkdirAll(TmpDir, os.ModePerm); err != nil {
+			panic(err)
+		}
+	}
+	//TmpDir = getTmpDir()
 }
 
 var TmpDir string
