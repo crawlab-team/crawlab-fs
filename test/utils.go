@@ -15,7 +15,7 @@ import (
 
 func init() {
 	var err error
-	TmpDir, err = filepath.Abs(path.Join(".", "tmp"))
+	TmpDir, err = filepath.Abs("tmp")
 	if err != nil {
 		panic(err)
 	}
@@ -30,6 +30,11 @@ func init() {
 var TmpDir string
 
 func StartTestSeaweedFs() (err error) {
+	// skip if CRAWLAB_IGNORE_WEED is set true
+	if os.Getenv("CRAWLAB_IGNORE_WEED") != "" {
+		return nil
+	}
+
 	// write to start.sh and stop.sh
 	if err := writeShFiles(TmpDir); err != nil {
 		return trace.TraceError(err)
@@ -60,6 +65,11 @@ func StartTestSeaweedFs() (err error) {
 }
 
 func StopTestSeaweedFs() (err error) {
+	// skip if CRAWLAB_IGNORE_WEED is set true
+	if os.Getenv("CRAWLAB_IGNORE_WEED") != "" {
+		return nil
+	}
+
 	// stop seaweedfs
 	if err := runCmd(exec.Command("sh", "./stop.sh"), TmpDir); err != nil {
 		return trace.TraceError(err)

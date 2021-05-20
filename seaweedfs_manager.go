@@ -261,8 +261,13 @@ func (m *SeaweedFsManager) SyncRemoteToLocal(remotePath, localPath string, args 
 
 	// compare remote files with local files and download if files with difference
 	for _, remoteFile := range remoteFiles {
-		// skip directories
+		// directory
 		if remoteFile.IsDir {
+			localDirRelativePath := strings.Replace(remoteFile.FullPath, remotePath, "", 1)
+			localDirPath := fmt.Sprintf("%s%s", localPath, localDirRelativePath)
+			if err := m.SyncRemoteToLocal(remoteFile.FullPath, localDirPath); err != nil {
+				return err
+			}
 			continue
 		}
 

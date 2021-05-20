@@ -50,7 +50,7 @@ func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (l
 	}
 
 	// cache remote files info
-	remoteFiles, err = f.ListDir(remotePath)
+	remoteFiles, err = f.ListDirRecursive(remotePath)
 	if err != nil {
 		if err.Error() != FilerResponseNotFoundErrorMessage {
 			return localFiles, remoteFiles, localFilesMap, remoteFilesMap, err

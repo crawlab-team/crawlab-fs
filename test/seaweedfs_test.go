@@ -164,7 +164,12 @@ func TestSeaweedFsManager_SyncLocalToRemote(t *testing.T) {
 	require.Nil(t, err)
 
 	data, err := T.m.GetFile("/test/data/test_data.txt")
+	require.Nil(t, err)
 	require.Equal(t, "this is a test data", string(data))
+
+	data, err = T.m.GetFile("/test/data/nested/nested_test_data.txt")
+	require.Nil(t, err)
+	require.Equal(t, "this is nested test data", string(data))
 
 	err = ioutil.WriteFile("./tmp/data/test_data.txt", []byte("this is changed data"), os.ModePerm)
 	require.Nil(t, err)
@@ -209,6 +214,10 @@ func TestSeaweedFsManager_SyncRemoteToLocal(t *testing.T) {
 	data, err := ioutil.ReadFile("./tmp/data/test_data.txt")
 	require.Nil(t, err)
 	require.Equal(t, "this is a test data", string(data))
+
+	data, err = ioutil.ReadFile("./tmp/data/nested/nested_test_data.txt")
+	require.Nil(t, err)
+	require.Equal(t, "this is nested test data", string(data))
 
 	err = T.m.UpdateFile("/test/data/test_data.txt", []byte("this is changed data"))
 	require.Nil(t, err)
