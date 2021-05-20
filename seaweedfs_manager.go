@@ -220,11 +220,6 @@ func (m *SeaweedFsManager) SyncLocalToRemote(localPath, remotePath string, args 
 }
 
 func (m *SeaweedFsManager) SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error) {
-	localPath, err = filepath.Abs(localPath)
-	if err != nil {
-		return trace.TraceError(err)
-	}
-
 	// create directory if local path does not exist
 	if _, err := os.Stat(localPath); err != nil {
 		if err := os.MkdirAll(localPath, os.ModePerm); err != nil {
