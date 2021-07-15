@@ -21,13 +21,18 @@ type SeaweedFsManager struct {
 	// settings variables
 	filerUrl string
 	timeout  time.Duration
+	authKey  string
 
 	// internals
 	f *goseaweedfs.Filer
 }
 
 func (m *SeaweedFsManager) Init() (err error) {
-	m.f, err = goseaweedfs.NewFiler(m.filerUrl, &http.Client{Timeout: m.timeout})
+	var filerOpts []goseaweedfs.FilerOption
+	if m.authKey != "" {
+		filerOpts = append(filerOpts, goseaweedfs.WithFilerAuthKey(m.authKey))
+	}
+	m.f, err = goseaweedfs.NewFiler(m.filerUrl, &http.Client{Timeout: m.timeout}, filerOpts...)
 	if err != nil {
 		return trace.TraceError(err)
 	}
@@ -105,6 +110,13 @@ func (m *SeaweedFsManager) DownloadFile(remotePath, localPath string, args ...in
 		if err != nil {
 			// if not exists, create a new directory
 			if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+				return trace.TraceError(err)
+			}
+		}
+		_, err = os.Stat(localPath)
+		if err == nil {
+			// if file already exists, remove it
+			if err := os.Remove(localPath); err != nil {
 				return trace.TraceError(err)
 			}
 		}
@@ -305,6 +317,21 @@ func (m *SeaweedFsManager) GetFile(remotePath string, args ...interface{}) (data
 	return
 }
 
+func (m *SeaweedFsManager) GetFileInfo(remotePath string, args ...interface{}) (file *goseaweedfs.FilerFileInfo, err error) {
+	arr := strings.Split(remotePath, "/")
+	dirName := strings.Join(arr[:(len(arr)-1)], "/")
+	files, err := m.f.ListDir(dirName)
+	if err != nil {
+		return file, trace.TraceError(err)
+	}
+	for _, f := range files {
+		if f.FullPath == remotePath {
+			return &f, nil
+		}
+	}
+	return nil, trace.TraceError(ErrorFsNotExists)
+}
+
 func (m *SeaweedFsManager) UpdateFile(remotePath string, data []byte, args ...interface{}) (err error) {
 	tmpRootDir := os.TempDir()
 	tmpDirPath := path.Join(tmpRootDir, ".seaweedfs")
@@ -346,6 +373,10 @@ func (m *SeaweedFsManager) Exists(remotePath string, args ...interface{}) (ok bo
 
 func (m *SeaweedFsManager) SetFilerUrl(url string) {
 	m.filerUrl = url
+}
+
+func (m *SeaweedFsManager) SetFilerAuthKey(authKey string) {
+	m.authKey = authKey
 }
 
 func (m *SeaweedFsManager) SetTimeout(timeout time.Duration) {

@@ -18,8 +18,10 @@ type Manager interface {
 	SyncLocalToRemote(localPath, remotePath string, args ...interface{}) (err error)
 	SyncRemoteToLocal(remotePath, localPath string, args ...interface{}) (err error)
 	GetFile(remotePath string, args ...interface{}) (data []byte, err error)
+	GetFileInfo(remotePath string, args ...interface{}) (file *goseaweedfs.FilerFileInfo, err error)
 	UpdateFile(remotePath string, data []byte, args ...interface{}) (err error)
 	Exists(remotePath string, args ...interface{}) (ok bool, err error)
 	SetFilerUrl(url string)
+	SetFilerAuthKey(authKey string)
 	SetTimeout(timeout time.Duration)
 }

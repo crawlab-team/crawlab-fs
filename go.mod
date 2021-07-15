@@ -2,6 +2,8 @@ module github.com/crawlab-team/crawlab-fs
 
 go 1.15
 
+replace github.com/crawlab-team/goseaweedfs => /Users/marvzhang/projects/crawlab-team/goseaweedfs
+
 require (
 	github.com/apex/log v1.9.0
 	github.com/cenkalti/backoff/v4 v4.1.0
