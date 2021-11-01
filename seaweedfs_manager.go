@@ -109,18 +109,20 @@ func (m *SeaweedFsManager) DownloadFile(remotePath, localPath string, args ...in
 		_, err = os.Stat(dirPath)
 		if err != nil {
 			// if not exists, create a new directory
-			if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+			if err := os.MkdirAll(dirPath, DefaultDirMode); err != nil {
 				return trace.TraceError(err)
 			}
 		}
-		_, err = os.Stat(localPath)
+		fileMode := DefaultFileMode
+		fileInfo, err := os.Stat(localPath)
 		if err == nil {
-			// if file already exists, remove it
+			// if file already exists, save file mode and remove it
+			fileMode = fileInfo.Mode()
 			if err := os.Remove(localPath); err != nil {
 				return trace.TraceError(err)
 			}
 		}
-		if err := ioutil.WriteFile(localPath, data, os.ModePerm); err != nil {
+		if err := ioutil.WriteFile(localPath, data, fileMode); err != nil {
 			return trace.TraceError(err)
 		}
 		return nil
