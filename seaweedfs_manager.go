@@ -186,18 +186,19 @@ func (m *SeaweedFsManager) SyncLocalToRemote(localPath, remotePath string, args 
 
 	// compare remote files with local files and delete files absent in local files
 	for _, remoteFile := range remoteFiles {
-		// skip directories
-		if remoteFile.IsDir {
-			continue
-		}
-
 		// attempt to get corresponding local file
 		_, ok := localFilesMap[remoteFile.FullPath]
 
 		if !ok {
 			// file does not exist on local, delete
-			if err := m.DeleteFile(remoteFile.FullPath); err != nil {
-				return trace.TraceError(err)
+			if remoteFile.IsDir {
+				if err := m.DeleteDir(remoteFile.FullPath); err != nil {
+					return trace.TraceError(err)
+				}
+			} else {
+				if err := m.DeleteFile(remoteFile.FullPath); err != nil {
+					return trace.TraceError(err)
+				}
 			}
 		}
 	}

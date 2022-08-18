@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/crawlab-team/goseaweedfs"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -47,6 +48,16 @@ func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (l
 	for _, file := range localFiles {
 		fileRemotePath := fmt.Sprintf("%s%s", remotePath, strings.Replace(file.Path, localPath, "", -1))
 		localFilesMap[fileRemotePath] = file
+
+		// directory
+		dirRemotePath := filepath.Dir(fileRemotePath)
+		_, ok := localFilesMap[dirRemotePath]
+		if !ok {
+			localFilesMap[dirRemotePath] = goseaweedfs.FileInfo{
+				Name: filepath.Base(dirRemotePath),
+				Path: dirRemotePath,
+			}
+		}
 	}
 
 	// cache remote files info
@@ -57,9 +68,22 @@ func getFilesAndFilesMaps(f *goseaweedfs.Filer, localPath, remotePath string) (l
 		}
 		err = nil
 	}
+	remoteFiles = getFlattenRemoteFiles(remoteFiles)
 	for _, file := range remoteFiles {
 		remoteFilesMap[file.FullPath] = file
 	}
 
+	return
+}
+
+func getFlattenRemoteFiles(files []goseaweedfs.FilerFileInfo) (flattenFiles []goseaweedfs.FilerFileInfo) {
+	flattenFiles = []goseaweedfs.FilerFileInfo{}
+	for _, file := range files {
+		flattenFiles = append(flattenFiles, file)
+
+		if file.IsDir {
+			flattenFiles = append(flattenFiles, getFlattenRemoteFiles(file.Children)...)
+		}
+	}
 	return
 }

@@ -14,7 +14,5 @@ func TestMain(m *testing.M) {
 	m.Run()
 
 	// after test
-	if err := StopTestSeaweedFs(); err != nil {
-		panic(err)
-	}
+	_ = StopTestSeaweedFs()
 }

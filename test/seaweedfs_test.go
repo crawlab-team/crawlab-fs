@@ -6,7 +6,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestNewSeaweedFsManager(t *testing.T) {
@@ -190,6 +192,23 @@ func TestSeaweedFsManager_SyncLocalToRemote(t *testing.T) {
 	files, err := T.m.ListDir("/test/data", true)
 	for _, file := range files {
 		if file.Name == "test_data.txt" {
+			valid = false
+		}
+	}
+	require.True(t, valid)
+
+	// check if directory is deleted after sync
+	err = ioutil.WriteFile("./tmp/test.txt", []byte("test"), os.ModePerm)
+	require.Nil(t, err)
+	err = T.m.UploadFile("./tmp/test.txt", "/test/data/folder1/test.txt")
+	require.Nil(t, err)
+	time.Sleep(1 * time.Second)
+	err = T.m.SyncLocalToRemote("./tmp/data", "/test/data")
+	require.Nil(t, err)
+	valid = true
+	files, err = T.m.ListDir("/test/data", true)
+	for _, file := range files {
+		if strings.Contains(file.FullPath, "folder1") {
 			valid = false
 		}
 	}
