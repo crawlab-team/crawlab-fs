@@ -11,10 +11,14 @@ github.com/crawlab-team/go-trace v0.1.0 h1:uCqfdqNfb+NwqdkQrBkcYfQ9iqGJ76MbPw1wK
 github.com/crawlab-team/go-trace v0.1.0/go.mod h1:LcWyn68HoT+d29CHM8L41pFHxsAcBMF1xjqJmWdyFh8=
 github.com/crawlab-team/goseaweedfs v0.6.0-beta.20211101.1936 h1:c4SgTj2baDqD2UYa1eCpj3ukOF3mXOjvOCP4cWwgfyw=
 github.com/crawlab-team/goseaweedfs v0.6.0-beta.20211101.1936/go.mod h1:u+rwfqb0rnYllTLjCctE/z1Yp+TC8L+CbbWH8E2NstA=
+github.com/crawlab-team/goseaweedfs v0.6.0-beta.20211101.1936.0.20220912021203-dfee5f74dd69 h1:qPLsh2aWqI5HioWBymzQirt+HQxfRgd7BSoOqfN33Q0=
+github.com/crawlab-team/goseaweedfs v0.6.0-beta.20211101.1936.0.20220912021203-dfee5f74dd69/go.mod h1:u+rwfqb0rnYllTLjCctE/z1Yp+TC8L+CbbWH8E2NstA=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
+github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=

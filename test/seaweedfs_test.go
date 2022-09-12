@@ -1,12 +1,15 @@
 package test
 
 import (
+	"fmt"
+	"github.com/apex/log"
 	"github.com/crawlab-team/crawlab-fs"
 	"github.com/crawlab-team/crawlab-fs/lib/copy"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -286,4 +289,185 @@ func TestSeaweedFsManager_Exists(t *testing.T) {
 	ok, err = T.m.Exists("/test/data/test_data_404.txt")
 	require.Nil(t, err)
 	require.False(t, ok)
+}
+
+func TestSeaweedFsManager_ListDirPressure(t *testing.T) {
+	var err error
+	T.Setup(t)
+
+	err = T.m.UploadDir("./data/nested", "/test/data/nested")
+	require.Nil(t, err)
+
+	n := int(1e3)
+	doneNum := 0
+	errNum := 0
+	startTs := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			_, err := T.m.ListDir("test/data", true)
+			wg.Done()
+			if err != nil {
+				errNum++
+			}
+			doneNum++
+			log.Infof("list dir: %d/%d", doneNum, n)
+			require.Nil(t, err)
+		}(i)
+	}
+	wg.Wait()
+
+	endTs := time.Now()
+	duration := endTs.Sub(startTs).Milliseconds()
+
+	fmt.Println(fmt.Sprintf("total: %d", n))
+	fmt.Println(fmt.Sprintf("errors: %d", errNum))
+	fmt.Println(fmt.Sprintf("error rate: %.3f", float32(errNum)/float32(n)))
+	fmt.Println(fmt.Sprintf("duration: %dms", duration))
+}
+
+func TestSeaweedFsManager_UploadFilePressure(t *testing.T) {
+	var err error
+	T.Setup(t)
+
+	n := int(1e3)
+	doneNum := 0
+	errNum := 0
+	startTs := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			err = T.m.UploadFile("./data/test_data.txt", fmt.Sprintf("/test/data/test_data_%d.txt", i))
+			wg.Done()
+			if err != nil {
+				errNum++
+			}
+			doneNum++
+			log.Infof("upload file: %d/%d", doneNum, n)
+			require.Nil(t, err)
+		}(i)
+	}
+	wg.Wait()
+
+	endTs := time.Now()
+	duration := endTs.Sub(startTs).Milliseconds()
+
+	fmt.Println(fmt.Sprintf("total: %d", n))
+	fmt.Println(fmt.Sprintf("errors: %d", errNum))
+	fmt.Println(fmt.Sprintf("error rate: %.3f", float32(errNum)/float32(n)))
+	fmt.Println(fmt.Sprintf("duration: %dms", duration))
+}
+
+func TestSeaweedFsManager_UploadDirPressure(t *testing.T) {
+	var err error
+	T.Setup(t)
+
+	n := int(1e3)
+	doneNum := 0
+	errNum := 0
+	startTs := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			err = T.m.UploadDir("./data/nested", "/test/data")
+			wg.Done()
+			if err != nil {
+				errNum++
+			}
+			doneNum++
+			log.Infof("upload dir: %d/%d", doneNum, n)
+			require.Nil(t, err)
+		}(i)
+	}
+	wg.Wait()
+
+	endTs := time.Now()
+	duration := endTs.Sub(startTs).Milliseconds()
+
+	fmt.Println(fmt.Sprintf("total: %d", n))
+	fmt.Println(fmt.Sprintf("errors: %d", errNum))
+	fmt.Println(fmt.Sprintf("error rate: %.3f", float32(errNum)/float32(n)))
+	fmt.Println(fmt.Sprintf("duration: %dms", duration))
+}
+
+func TestSeaweedFsManager_SyncRemoteToLocalPressure(t *testing.T) {
+	var err error
+	T.Setup(t)
+
+	if _, err := os.Stat("./tmp/data"); err == nil {
+		err = os.RemoveAll("./tmp/data")
+		require.Nil(t, err)
+	}
+
+	err = T.m.UploadDir("./data", "/test/data")
+	require.Nil(t, err)
+
+	n := int(1e3)
+	doneNum := 0
+	errNum := 0
+	startTs := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			err = T.m.SyncRemoteToLocal("/test/data", fmt.Sprintf("./tmp/data_%d", i))
+			wg.Done()
+			if err != nil {
+				errNum++
+			}
+			doneNum++
+			log.Infof("updated: %d/%d", doneNum, n)
+			require.Nil(t, err)
+		}(i)
+	}
+	wg.Wait()
+
+	endTs := time.Now()
+	duration := endTs.Sub(startTs).Milliseconds()
+
+	fmt.Println(fmt.Sprintf("total: %d", n))
+	fmt.Println(fmt.Sprintf("errors: %d", errNum))
+	fmt.Println(fmt.Sprintf("error rate: %.3f", float32(errNum)/float32(n)))
+	fmt.Println(fmt.Sprintf("duration: %dms", duration))
+}
+
+func TestSeaweedFsManager_UpdateFilePressure(t *testing.T) {
+	var err error
+	T.Setup(t)
+
+	n := int(5e3)
+	doneNum := 0
+	errNum := 0
+	startTs := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			err = T.m.UpdateFile(fmt.Sprintf("/test/data/test_data_%5d.txt", i), []byte(fmt.Sprintf("this is test data: %5d", i)))
+			wg.Done()
+			if err != nil {
+				errNum++
+			}
+			doneNum++
+			log.Infof("updated: %d/%d", doneNum, n)
+			require.Nil(t, err)
+		}(i)
+	}
+	wg.Wait()
+
+	endTs := time.Now()
+	duration := endTs.Sub(startTs).Milliseconds()
+
+	fmt.Println(fmt.Sprintf("total: %d", n))
+	fmt.Println(fmt.Sprintf("errors: %d", errNum))
+	fmt.Println(fmt.Sprintf("error rate: %.3f", float32(errNum)/float32(n)))
+	fmt.Println(fmt.Sprintf("duration: %dms", duration))
 }

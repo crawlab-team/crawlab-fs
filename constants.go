@@ -11,3 +11,9 @@ const (
 	DefaultDirMode  = os.FileMode(0766)
 	DefaultFileMode = os.FileMode(0666)
 )
+
+const (
+	MethodUpdateFile = "update-file"
+	MethodUploadFile = "upload-file"
+	MethodUploadDir  = "upload-dir"
+)
