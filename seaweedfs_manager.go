@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/apex/log"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/crawlab-team/go-trace"
 	"github.com/crawlab-team/goseaweedfs"
@@ -325,7 +324,7 @@ func (m *SeaweedFsManager) start() {
 
 func (m *SeaweedFsManager) process(params seaweedFsManagerParams, fn seaweedFsManagerFn) (res seaweedFsManagerResults) {
 	handle := m.newHandle(params, fn)
-	log.Infof("handle: %v", handle)
+	//log.Infof("handle: %v", handle)
 	m.ch <- handle
 	res = <-handle.resChan
 	return
