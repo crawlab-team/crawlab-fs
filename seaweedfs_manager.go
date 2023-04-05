@@ -689,7 +689,7 @@ func NewSeaweedFsManager(opts ...Option) (m2 Manager, err error) {
 	m := &SeaweedFsManager{
 		filerUrl:      "http://localhost:8888",
 		timeout:       5 * time.Minute,
-		workerNum:     1,
+		workerNum:     10,
 		retryInterval: 500 * time.Millisecond,
 		retryNum:      3,
 		maxQps:        5,
