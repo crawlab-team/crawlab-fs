@@ -520,7 +520,7 @@ func (m *SeaweedFsManager) syncLocalToRemote(params seaweedFsManagerParams) (res
 	// compare local files with remote files and upload files with difference
 	for _, localFile := range localFiles {
 		// skip .git
-		if IsGitFile(localFile) {
+		if IsGitFile(localFile) || IsIgnoreFile(localFile) {
 			continue
 		}
 
@@ -568,7 +568,7 @@ func (m *SeaweedFsManager) syncRemoteToLocal(params seaweedFsManagerParams) (res
 	// compare local files with remote files and delete files absent on remote
 	for _, localFile := range localFiles {
 		// skip .git
-		if IsGitFile(localFile) {
+		if IsGitFile(localFile) || IsIgnoreFile(localFile) {
 			continue
 		}
 
