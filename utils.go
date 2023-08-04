@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/crawlab-team/goseaweedfs"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -11,7 +12,11 @@ import (
 
 func IsGitFile(file goseaweedfs.FileInfo) (res bool) {
 	// skip .git
-	res, err := regexp.MatchString("/?\\.git/", file.Path)
+	filerStr := os.Getenv("CRAWLAB_IS_GIT_FILER")
+	if filerStr == "" {
+		filerStr = "/?\\.git/"
+	}
+	res, err := regexp.MatchString(filerStr, file.Path)
 	if err != nil {
 		return false
 	}
